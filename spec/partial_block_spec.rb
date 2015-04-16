@@ -41,14 +41,14 @@ describe "Calling PartialBlocks with incorrect parameters" do
     bloque_a_romper = PartialBlock.new([Integer, String]) do |numero, palabra|
       numero * 2
     end
-      expect { bloque_a_romper.call(10) }.to raise_error(Exception::ArgumentsException)
+      expect { bloque_a_romper.call(10) }.to raise_error(Exception::ArgumentsError)
   end
 
   it "Si llamo a un bloque con más parámetros tira ArgumentsException" do
     bloque_a_romper = PartialBlock.new([String, Object]) do |p, q|
       p
     end
-    expect { bloque_a_romper.call("Hola", Object.new, 1000) }.to raise_error(Exception::ArgumentsException)
+    expect { bloque_a_romper.call("Hola", Object.new, 1000) }.to raise_error(Exception::ArgumentsError)
   end
 
   it "Si llamo a un bloque con parámetros de tipos erróneos tira ArgumentsTypeException" do
