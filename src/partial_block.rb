@@ -1,36 +1,30 @@
-class NumParametersExeption < RuntimeError
-end
-
-class TypeParametersExeption < RuntimeError
-end
-
-
-
 class PartialBlock
 
   def initialize(clase,&block)
-    @bloque=block
-    @clase=clase
+    @bloque = block
+    @tipos_de_parametros = clase
   end
 
-  def call(*algos)
-      if self.matches(*algos)
-        @bloque.call(*algos)
+  def call(*argumentos)
+      if self.matches(*argumentos)
+        @bloque.call(*argumentos)
       else
-        raise TypeParametersExeption, 'Diferente tipo de parametros'
+        raise ArgumentsTypeException, 'Diferente tipo de parámetros.'
       end
   end
 
 
-  def matches(*algos)
-    if algos.size==@clase.size
-      i=0
-      algos.all? do |algo|
-        i+=1
-        algo.is_a?(@clase[i-1])
+  def matches(*argumentos)
+    if argumentos.size == @tipos_de_parametros.size
+      i = 0
+      argumentos.all? do |argumento|
+        argumento.is_a?(@tipos_de_parametros[i])
+        i += 1
       end
+    elsif argumentos.size < @tipos_de_parametros.size
+      raise ArgumentsException, 'Cantidad insuficiente de argumentos.'
     else
-      raise NumParametersExeption, 'Diferente cantidad de parametros'
+      raise ArgumentsException, 'Demasiados argumentos.'
     end
   end
 
