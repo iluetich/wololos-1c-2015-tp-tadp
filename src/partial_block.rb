@@ -9,7 +9,7 @@ class PartialBlock
       if self.matches(*argumentos)
         @bloque.call(*argumentos)
       else
-        raise ArgumentsTypeException, 'Diferente tipo de parámetros.'
+        raise ArgumentsTypeException.new, 'Diferente tipo de parámetros.'
       end
   end
 
@@ -18,13 +18,16 @@ class PartialBlock
     if argumentos.size == @tipos_de_parametros.size
       i = 0
       argumentos.all? do |argumento|
-        argumento.is_a?(@tipos_de_parametros[i])
-        i += 1
+       if argumento.is_a?(@tipos_de_parametros[i])
+          i += 1
+       else
+          false #TODO de alguna manera el all? nunca retorna false por sí sólo.
+       end
       end
     elsif argumentos.size < @tipos_de_parametros.size
-      raise ArgumentsException, 'Cantidad insuficiente de argumentos.'
+      raise ArgumentsException.new, 'Cantidad insuficiente de argumentos.'
     else
-      raise ArgumentsException, 'Demasiados argumentos.'
+      raise ArgumentsException.new, 'Demasiados argumentos.'
     end
   end
 
