@@ -13,7 +13,6 @@ class PartialBlock
       end
   end
 
-
   def matches(*argumentos)
     if argumentos.size == @tipos_de_parametros.size
       i = 0
@@ -27,7 +26,6 @@ class PartialBlock
       raise ArgumentsError.new, 'Demasiados argumentos.'
     end
   end
-
 
 end
 
