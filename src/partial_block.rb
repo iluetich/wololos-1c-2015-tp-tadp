@@ -9,7 +9,7 @@ class PartialBlock
       if self.matches(*argumentos)
         @bloque.call(*argumentos)
       else
-        raise ArgumentsTypeException.new, 'Diferente tipo de parámetros.'
+        raise ArgumentTypeException.new, 'Diferente tipo de parámetros.'
       end
   end
 
@@ -21,9 +21,9 @@ class PartialBlock
         argumento.is_a?(@tipos_de_parametros[i-1])
       end
     elsif argumentos.size < @tipos_de_parametros.size
-      raise ArgumentsError.new, 'Cantidad insuficiente de argumentos.'
+      raise ArgumentError.new, 'Cantidad insuficiente de argumentos.'
     else
-      raise ArgumentsError.new, 'Demasiados argumentos.'
+      raise ArgumentError.new, 'Demasiados argumentos.'
     end
   end
 

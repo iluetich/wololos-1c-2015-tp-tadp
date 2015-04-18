@@ -1,5 +1,2 @@
-class ArgumentsError < Exception
-end
-
-class ArgumentsTypeException < Exception
+class ArgumentTypeException < Exception
 end
