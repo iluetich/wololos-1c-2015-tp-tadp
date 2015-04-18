@@ -25,5 +25,9 @@ class PartialBlock < Proc
     end
   end
 
+  def tipos_de_parametros
+    @tipos_de_parametros = @tipos_de_parametros || []
+  end
+
 end
 
