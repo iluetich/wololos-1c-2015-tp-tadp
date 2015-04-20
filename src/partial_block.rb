@@ -11,7 +11,7 @@ class PartialBlock
 
   def call(*argumentos)
     raise ArgumentTypeException unless self.matches(*argumentos)
-      @bloque.call(*argumentos)
+    @bloque.call(*argumentos)
   end
 
   def matches(*argumentos)

@@ -20,27 +20,16 @@ module MultiMethods
   end
 
   def agregar_sobrecargar(una_sobrecarga, nombre_multimetodo, bloque_parcial)
-    if(self.encontro_misma_firma(nombre_multimetodo, bloque_parcial))
-      self.multimetodos.delete_if{|s| s.es_misma_firma(nombre_multimetodo, bloque_parcial)}
-    end
-
-    self.add_sobrecarga(una_sobrecarga)
-  end
-
-  def encontro_misma_firma(nombre_multimetodo, bloque_parcial)
-    self.multimetodos.any?{|s| s.es_misma_firma(nombre_multimetodo, bloque_parcial)}
+    self.multimetodos.delete_if{ |s| s.es_misma_firma(nombre_multimetodo, bloque_parcial) }
+    self.multimetodos << una_sobrecarga
   end
 
   def multimetodos
     @lista_de_multimetodos = @lista_de_multimetodos || []
   end
 
-  def add_sobrecarga(una_sobrecarga)
-    self.multimetodos << una_sobrecarga
-  end
-
   def obtener_sobrecargas_validas(sobrecargas, nombre_sobrecarga, *argumentos)
-    sobrecargas.select {|s| s.nombre == nombre_sobrecarga && s.matches(*argumentos)}
+    sobrecargas.select { |s| s.nombre == nombre_sobrecarga && s.matches(*argumentos) }
   end
 
   def elegir_mas_cercano(sobrecargas, *argumentos)

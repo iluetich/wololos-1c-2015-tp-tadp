@@ -5,6 +5,10 @@ class Sobrecarga
     @bloque_parcial = un_bloque_parcial
   end
 
+  def tipos_de_parametros
+    @bloque_parcial.tipos_de_parametros
+  end
+
   def nombre
     @nombre = @nombre || "sin nombre"
   end
@@ -27,7 +31,7 @@ class Sobrecarga
   end
 
   def es_misma_firma(nombre_multimetodo, bloque_parcial)
-    @nombre == nombre_multimetodo and @bloque_parcial.tipos_de_parametros == bloque_parcial.tipos_de_parametros
+    @nombre == nombre_multimetodo && self.tipos_de_parametros == bloque_parcial.tipos_de_parametros
   end
 
 end

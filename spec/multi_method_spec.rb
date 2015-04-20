@@ -44,7 +44,7 @@ describe ClaseParaTest do
       expect(@instancia.concat(Object.new, 3)).to eq("Objetos concatenados")
     end
 
-    it "3 multimetodos con la misma firma(nombre y cantidad y tipo de datos se pisan)" do
+    it "3 multimetodos con la misma firma se sobre-escriben" do
       expect(@instancia.metodo_loco(3)).to eq(3)
 
       ClaseParaTest.partial_def(:metodo_loco,[Numeric]) {|n1| n1 *2}
