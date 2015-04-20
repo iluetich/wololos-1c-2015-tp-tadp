@@ -14,9 +14,21 @@ module MultiMethods
   def partial_def(nombre_multimetodo, lista_de_tipos, &bloque)
     bloque_parcial = PartialBlock.new(lista_de_tipos, &bloque)
     una_sobrecarga = Sobrecarga.new(nombre_multimetodo, bloque_parcial)
-    self.add_sobrecarga(una_sobrecarga)
+    self.agregar_sobrecargar(una_sobrecarga, nombre_multimetodo, bloque_parcial)
     #Con el unless nos evitamos pisar las definiciones una y otra vez de una sobrecarga.
     self.crear_multimetodo(nombre_multimetodo) unless self.respond_to? nombre_multimetodo
+  end
+
+  def agregar_sobrecargar(una_sobrecarga, nombre_multimetodo, bloque_parcial)
+    if(self.encontro_misma_firma(nombre_multimetodo, bloque_parcial))
+      self.multimetodos.delete_if{|s| s.es_misma_firma(nombre_multimetodo, bloque_parcial)}
+    end
+
+    self.add_sobrecarga(una_sobrecarga)
+  end
+
+  def encontro_misma_firma(nombre_multimetodo, bloque_parcial)
+    self.multimetodos.any?{|s| s.es_misma_firma(nombre_multimetodo, bloque_parcial)}
   end
 
   def multimetodos
