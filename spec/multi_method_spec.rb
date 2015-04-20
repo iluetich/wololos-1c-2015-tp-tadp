@@ -4,10 +4,14 @@ require_relative '../src/multi_method'
 
 class ClaseParaTest
   extend MultiMethods
-  #vacía
+  def suma(a, b)
+    a + b
+  end
+
 end
 
 describe ClaseParaTest do
+
   before(:all) do
     ClaseParaTest.partial_def(:nacho, [Integer, Integer, Integer]) {|a, b, c| a + b + c}
     ClaseParaTest.partial_def(:concat, [Integer, Integer]) {|a, b| a + b}
@@ -16,21 +20,18 @@ describe ClaseParaTest do
     ClaseParaTest.partial_def(:concat, [Numeric, Numeric]) {|a, b| a / b}
     ClaseParaTest.partial_def(:concat, [Object, Object]) {|o1, o2| "Objetos concatenados" }
     ClaseParaTest.partial_def(:concat, [String, Integer]) {|s1,n| s1 * n}
+    ClaseParaTest.partial_def(:sumar_numeros, [Numeric, Numeric]) {|n, m| self.suma(n,m)}
     @instancia = ClaseParaTest.new
     @objeto = Object.new
   end
 
   describe "Casos de prueba de definiciones parciales" do
 
-    it "si llamo un multimétodo no definido, tira excepcion" do
+    it "Si llamo un multimétodo no definido, tira excepcion" do
       expect {@instancia.concatenar(1,2,3)}.to raise_exception
     end
 
-    it "Si defino un multi-método se ejecuta aquel con los parámetros correctos" do
-      expect(@instancia.concat('Hola', 3)).to eq("HolaHolaHola")
-    end
-
-    it "Si defino un multi-metodo con parámetros generales se ejecuta el más cercano" do
+    it "Se ejecuta el mas cercano" do
       expect(@instancia.concat(2.0,4.0)).to eq(0.5)
       expect(@instancia.concat(2,3)).to eq(5)
       expect(@instancia.concat("hola", 2)).to eq("holahola")
@@ -42,7 +43,15 @@ describe ClaseParaTest do
       expect(@instancia.concat(Object.new, 3)).to eq("Objetos concatenados")
     end
 
-
-
+    it "Las instancias responden a los multimetodos" do
+      expect(@instancia.respond_to? :concat).to eq(true)
+      expect(@instancia.respond_to? :nacho).to eq(true)
+      expect(@instancia.respond_to? :concatenar).to eq(false)
+    end
+=begin  TODO Esto no está funcionando.
+    it "Invocar a self dentro de un multimetodo funciona" do
+      expect(@instancia.sumar_numeros(1,1)).to eq(2)
+    end
+=end
   end
 end
