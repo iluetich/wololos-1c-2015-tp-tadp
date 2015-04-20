@@ -4,6 +4,7 @@ require_relative '../src/partial_block'
 require_relative '../src/sobrecarga'
 
 describe "ContextUp" do
+
   before(:all) do
     bloque_doble = PartialBlock.new([Numeric]) {|a| a + a}
     bloque_saraza = PartialBlock.new([Numeric, Integer]) {|a, b| "saraza"}
