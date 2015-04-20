@@ -2,7 +2,7 @@
 require_relative '../src/partial_block'
 require_relative '../src/sobrecarga'
 
-describe "Tests sobre distancia de parámetros" do
+describe "Tests sobre distancia de parmetros" do
 
   it "Distancia de Numeric a 3 es 2 y a 3.0 es 1" do
     b = PartialBlock.new([Numeric]) {|a| a+a}

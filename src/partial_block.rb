@@ -9,7 +9,7 @@ class PartialBlock < Proc
       if self.matches(*argumentos)
         @bloque.call(*argumentos)
       else
-        raise ArgumentTypeException.new, 'Diferente tipo de parámetros.'
+        raise ArgumentTypeException.new, 'Diferente tipo de parametros.'
       end
   end
 
