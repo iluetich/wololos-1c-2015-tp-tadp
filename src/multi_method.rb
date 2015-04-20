@@ -4,17 +4,19 @@ require_relative '../src/partial_block'
 
 module MultiMethods
 
-  def partial_def(nombre_metodo, lista_de_tipos, &bloque)
-
-    bloque_parcial = PartialBlock.new(lista_de_tipos, &bloque)
-    una_sobrecarga = Sobrecarga.new(nombre_metodo, bloque_parcial)
-    self.add_sobrecarga(una_sobrecarga)
-    self.send(:define_method, nombre_metodo) { |*argumentos|
-      my_name = nombre_metodo
-      sobrecargas = self.class.obtener_sobrecargas_validas(self.class.multimetodos, my_name, *argumentos)
+  def crear_multimetodo(nombre_multimetodo)
+    self.send(:define_method, nombre_multimetodo) { |*argumentos|
+      sobrecargas = self.class.obtener_sobrecargas_validas(self.class.multimetodos, nombre_multimetodo, *argumentos)
       self.class.elegir_mas_cercano(sobrecargas, *argumentos).call(*argumentos)
     }
+  end
 
+  def partial_def(nombre_multimetodo, lista_de_tipos, &bloque)
+    bloque_parcial = PartialBlock.new(lista_de_tipos, &bloque)
+    una_sobrecarga = Sobrecarga.new(nombre_multimetodo, bloque_parcial)
+    self.add_sobrecarga(una_sobrecarga)
+    #Con el unless nos evitamos pisar las definiciones una y otra vez de una sobrecarga.
+    self.crear_multimetodo(nombre_multimetodo) unless self.respond_to? nombre_multimetodo
   end
 
   def multimetodos
@@ -26,7 +28,7 @@ module MultiMethods
   end
 
   def obtener_sobrecargas_validas(sobrecargas, nombre_sobrecarga, *argumentos)
-    return sobrecargas.select {|s| s.nombre == nombre_sobrecarga && s.matches(*argumentos)}
+    sobrecargas.select {|s| s.nombre == nombre_sobrecarga && s.matches(*argumentos)}
   end
 
   def elegir_mas_cercano(sobrecargas, *argumentos)
