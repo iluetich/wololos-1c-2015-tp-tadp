@@ -18,13 +18,10 @@ class Sobrecarga
   end
 
   def distancia_a_parametros(*argumentos)
-    tipos_argumentos = @bloque_parcial.tipos_de_parametros
-    indice = 0
-    distancia_total = 0
-    argumentos.each do |arg|
-      distancia_parametro = arg.class.ancestors.index(tipos_argumentos[indice])
-      indice += 1
-      distancia_total += distancia_parametro * indice
+    i = distancia_total = 0
+    argumentos.zip(@bloque_parcial.tipos_de_parametros) do |argumento, tipo|
+      i+=1
+      distancia_total += argumento.class.ancestors.index(tipo) * i
     end
     distancia_total
   end
