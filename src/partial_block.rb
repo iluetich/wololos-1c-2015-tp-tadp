@@ -1,32 +1,24 @@
-class PartialBlock < Proc
+class PartialBlock
 
   def initialize(array_tipos_de_parametros,&block)
     @bloque = block
     @tipos_de_parametros = array_tipos_de_parametros
   end
 
+  def tipos_de_parametros
+    @tipos_de_parametros = @tipos_de_parametros || []
+  end
+
   def call(*argumentos)
-      if self.matches(*argumentos)
-        @bloque.call(*argumentos)
-      else
-        raise ArgumentTypeException.new, 'Diferente tipo de parametros.'
-      end
+    raise ArgumentTypeException unless self.matches(*argumentos)
+      @bloque.call(*argumentos)
   end
 
   def matches(*argumentos)
-    if argumentos.size == @tipos_de_parametros.size
-      i = 0
-      argumentos.all? do |argumento|
-        i += 1
-        argumento.is_a?(@tipos_de_parametros[i-1])
-      end
-    else
-      false
+    return false unless argumentos.size == @tipos_de_parametros.size
+    argumentos.zip(@tipos_de_parametros).all? do |argumento, tipo|
+      argumento.is_a? tipo
     end
-  end
-
-  def tipos_de_parametros
-    @tipos_de_parametros = @tipos_de_parametros || []
   end
 
 end
