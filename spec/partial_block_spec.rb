@@ -5,7 +5,7 @@ require_relative '../src/exceptions/exceptions'
 
 describe "Calling PartialBlocks with correct parameters" do
 
-  it "Devuelve un Hello mas parametro String" do
+  it "Devuelve un Hello mas parámetro String" do
     helloblock = PartialBlock.new([String]) do |who|
       "Hello #{who}!"
     end
@@ -20,7 +20,7 @@ describe "Calling PartialBlocks with correct parameters" do
     expect(arrayblock.call("hola", 200)).to eq(["hola", 200])
   end
 
-  it "Devuelve 'pi' sin asignarle parametros" do
+  it "Devuelve 'pi' sin asignarle parámetros" do
     pi = PartialBlock.new([]) do
       3.14159265359
     end
@@ -37,25 +37,26 @@ describe "Calling PartialBlocks with correct parameters" do
 end
 
 describe "Calling PartialBlocks with incorrect parameters" do
-  it "Si llamo a un bloque con menos parametros tira ArgumentsException" do
+  it "Si llamo a un bloque con menos parámetros no matchea" do
     bloque_a_romper = PartialBlock.new([Integer, String]) do |numero, palabra|
       numero * 2
     end
-      expect { bloque_a_romper.call(10) }.to raise_error(ArgumentError)
+      expect(bloque_a_romper.matches(10)).to eq(false)
   end
 
-  it "Si llamo a un bloque con mas parametros tira ArgumentsException" do
+  it "Si llamo a un bloque con más parámetros no matchea" do
     bloque_a_romper = PartialBlock.new([String, Object]) do |p, q|
       p
     end
-    expect { bloque_a_romper.call("Hola", Object.new, 1000) }.to raise_error(ArgumentError)
+    expect(bloque_a_romper.matches("Hola", Object.new, 1000)).to eq(false)
   end
 
-  it "Si llamo a un bloque con parametros de tipos erroneos tira ArgumentsTypeException" do
+  it "Si llamo a un bloque con parámetros de tipos erróneos tira ArgumentsTypeException" do
     bloque_a_estallar = PartialBlock.new([Integer, Integer]) do |a, b|
       a + b * a
     end
     expect { bloque_a_estallar.call(10, "super saraza") }.to raise_error(ArgumentTypeException)
+    expect { bloque_a_estallar.call("Hola", 2) }.to raise_error(ArgumentTypeException)
   end
 
 end
