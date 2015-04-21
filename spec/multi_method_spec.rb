@@ -60,10 +60,8 @@ describe ClaseParaTest do
       expect(@instancia.respond_to? :concatenar).to eq(false)
     end
 
-=begin  TODO Esto no está funcionando.
     it "Invocar a self dentro de un multimetodo funciona" do
       expect(@instancia.sumar_numeros(1,1)).to eq(2)
     end
-=end
   end
 end
