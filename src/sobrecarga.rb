@@ -13,6 +13,10 @@ class Sobrecarga
     @nombre = @nombre || "sin nombre"
   end
 
+  def bloque
+    @bloque_parcial
+  end
+
   def matches(*argumentos)
     @bloque_parcial.matches(*argumentos)
   end

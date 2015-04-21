@@ -9,6 +9,10 @@ class PartialBlock
     @tipos_de_parametros = @tipos_de_parametros || []
   end
 
+  def bloque
+    @bloque
+  end
+
   def call(*argumentos)
     raise ArgumentTypeException unless self.matches(*argumentos)
     @bloque.call(*argumentos)
