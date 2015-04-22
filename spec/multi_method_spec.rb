@@ -87,6 +87,14 @@ describe ClaseParaTest do
       expect(@instancia.concat(2,3)).to eq(6)
     end
 
+    it "Si redefino un multimetodo en una instancia no pierdo el de mi superclase" do
+      @instancia.partial_def(:sumar_numeros, [Integer,Integer,Integer]) { |a,b,c| a+b+c}
+      a = ClaseParaTest.new
+      expect(@instancia.sumar_numeros(1,1,1)).to eq(3)
+      expect(@instancia.sumar_numeros(1,1)).to eq(2)
+      expect(a.sumar_numeros(1,1)).to eq(2)
+    end
+
     it "Definir un multimetodo solo para una instancia sin que sea para toda la clase" do
       a = ClaseParaTest.new
       b = ClaseParaTest.new
