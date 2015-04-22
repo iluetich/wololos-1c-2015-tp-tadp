@@ -2,12 +2,16 @@ require 'rspec'
 require_relative '../src/multi_method'
 #require_relative '../src/overload_module'
 
+Object.include(MultiMethods)
+
 class ClaseParaTest
-  extend MultiMethods
   def suma(a, b)
     a + b
   end
+end
 
+class ClaseBlah < ClaseParaTest
+  #vacio
 end
 
 describe ClaseParaTest do
@@ -22,11 +26,13 @@ describe ClaseParaTest do
     ClaseParaTest.partial_def(:concat, [String, Integer]) {|s1,n| s1 * n}
     ClaseParaTest.partial_def(:sumar_numeros, [Numeric, Numeric]) {|n, m| self.suma(n,m)}
     ClaseParaTest.partial_def(:metodo_loco,[Numeric]) {|n1| n1 * 1}
+    ClaseBlah.partial_def(:suma,[Numeric]) {|a| a}
+    @instancia_loca = ClaseBlah.new
     @instancia = ClaseParaTest.new
     @objeto = Object.new
   end
 
-  describe "Casos de prueba de definiciones parciales" do
+  describe "Tests de ejecución de multimetodos definidos en la clase" do
 
     it "Si llamo un multimétodo no definido, tira excepcion" do
       expect {@instancia.concatenar(1,2,3)}.to raise_exception
@@ -55,6 +61,7 @@ describe ClaseParaTest do
     end
 
     it "Las instancias responden a los multimetodos" do
+      #TODO falta extender respond_to? a 3 parámetros. (ver ejemplo de TP)
       expect(@instancia.respond_to? :concat).to eq(true)
       expect(@instancia.respond_to? :nacho).to eq(true)
       expect(@instancia.respond_to? :concatenar).to eq(false)
@@ -62,6 +69,12 @@ describe ClaseParaTest do
 
     it "Invocar a self dentro de un multimetodo funciona" do
       expect(@instancia.sumar_numeros(1,1)).to eq(2)
+    end
+  end
+  
+  describe "Tests de ejecución sobre herencia de clases" do
+    it "Funciona method lookup" do
+      expect(@instancia_loca.suma(1,2)).to eq(3)
     end
   end
 end
