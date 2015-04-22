@@ -9,7 +9,7 @@ module MultiMethods
       begin
         comportamiento = self.class.obtener_partial_block_cercano(nombre_multimetodo, *argumentos).bloque
         instance_exec(*argumentos, &comportamiento)
-      rescue NoMethodError
+      rescue NoSuchMultiMethodException
         #Seguir con el method LookUp
         super(*argumentos)
       end
@@ -41,7 +41,7 @@ module MultiMethods
   def obtener_partial_block_cercano(nombre_sobre_carga, *argumentos)
     sobre_carga = self.select_sobre_cargas(nombre_sobre_carga, *argumentos).min_by { |m| m.distancia_a_parametros(*argumentos) }
     if sobre_carga.eql? nil
-      raise NoMethodError
+      raise NoSuchMultiMethodException
     end
     sobre_carga.partial_block
   end

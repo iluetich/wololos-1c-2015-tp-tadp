@@ -1,6 +1,5 @@
 require 'rspec'
 require_relative '../src/multi_method'
-#require_relative '../src/overload_module'
 
 Object.include(MultiMethods)
 
@@ -70,8 +69,9 @@ describe ClaseParaTest do
     it "Invocar a self dentro de un multimetodo funciona" do
       expect(@instancia.sumar_numeros(1,1)).to eq(2)
     end
+
   end
-  
+
   describe "Tests de ejecución sobre herencia de clases" do
     it "Funciona method lookup" do
       expect(@instancia_loca.suma(1,2)).to eq(3)
