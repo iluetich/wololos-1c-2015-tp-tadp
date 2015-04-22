@@ -13,7 +13,7 @@ class Sobrecarga
     @nombre = @nombre || "sin nombre"
   end
 
-  def bloque
+  def partial_block
     @bloque_parcial
   end
 

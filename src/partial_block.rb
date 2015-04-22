@@ -19,7 +19,7 @@ class PartialBlock
   end
 
   def matches(*argumentos)
-    return false unless argumentos.size == @tipos_de_parametros.size
+    return false unless argumentos.count == @tipos_de_parametros.count
     argumentos.zip(@tipos_de_parametros).all? do |argumento, tipo|
       argumento.is_a? tipo
     end
