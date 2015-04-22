@@ -69,7 +69,33 @@ describe ClaseParaTest do
     it "Invocar a self dentro de un multimetodo funciona" do
       expect(@instancia.sumar_numeros(1,1)).to eq(2)
     end
+  end
 
+  describe "Tests de ejecución de multimetodos definidos en la INSTANCIA" do
+    it "Definir un nuevo multimetodo en una instancia" do
+      @instancia.partial_def(:multiplicar,[Integer,Integer]) do |a,b|
+        a*b
+      end
+      expect(@instancia.multiplicar(2,3)).to eq(6)
+    end
+
+    it "Redefinir un multimetodo en una instancia modificando uno que estaba definido en la clase" do
+      expect(@instancia.concat(2,3)).to eq(5)
+      @instancia.partial_def(:concat,[Integer,Integer]) do |a,b|
+        a*b
+      end
+      expect(@instancia.concat(2,3)).to eq(6)
+    end
+
+    it "Definir un multimetodo solo para una instancia sin que sea para toda la clase" do
+      a = ClaseParaTest.new
+      b = ClaseParaTest.new
+      a.partial_def(:concat,[Integer,Integer]) do |a,b|
+        a*b
+      end
+      expect(a.concat(2,3)).to eq(6)
+      expect(b.concat(2,3)).to eq(5)
+    end
   end
 
   describe "Tests de ejecución sobre herencia de clases" do
@@ -77,4 +103,6 @@ describe ClaseParaTest do
       expect(@instancia_loca.suma(1,2)).to eq(3)
     end
   end
+
+
 end

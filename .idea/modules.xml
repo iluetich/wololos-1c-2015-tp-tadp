@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/../tadp-2015c1-ruby-age-of-empires/.idea/tadp-2015c1-ruby-age-of-empires.iml" filepath="$PROJECT_DIR$/../tadp-2015c1-ruby-age-of-empires/.idea/tadp-2015c1-ruby-age-of-empires.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/wololos-1c-2015-tp-tadp.iml" filepath="$PROJECT_DIR$/.idea/wololos-1c-2015-tp-tadp.iml" />
     </modules>
   </component>
