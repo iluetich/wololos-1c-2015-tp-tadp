@@ -4,36 +4,22 @@ require_relative '../src/partial_block'
 
 module MultiMethods
 
+  #Creo un multimethod en el contexto en que lo definen
   def crear_multimetodo(nombre_multimetodo)
-    if self.superclass==Object #Solo se cumple si self NO es una singleton class de instancia
-      self.send(:define_method, nombre_multimetodo) { |*argumentos|
-        begin
-          comportamiento = self.class.obtener_partial_block_cercano(nombre_multimetodo, *argumentos).bloque
-          instance_exec(*argumentos, &comportamiento)
-        rescue NoSuchMultiMethodException
-          #Seguir con el method LookUp
-          super(*argumentos)
-        end
-      }
-    else
-      self.send(:define_method, nombre_multimetodo) { |*argumentos|
-        begin
-          comportamiento = self.singleton_class.obtener_partial_block_cercano(nombre_multimetodo, *argumentos).bloque
-          instance_exec(*argumentos, &comportamiento)
-        rescue NoSuchMultiMethodException
-          #Seguir con el method LookUp
-          super(*argumentos)
-        end
-      }
-    end
+    contexto = self
+    self.send(:define_method, nombre_multimetodo) { |*argumentos|
+      begin
+        comportamiento = contexto.obtener_partial_block_cercano(nombre_multimetodo, *argumentos).bloque
+        instance_exec(*argumentos, &comportamiento)
+      rescue NoSuchMultiMethodException
+        #Seguir con el method LookUp
+        super(*argumentos)
+      end
+    }
   end
 
   def partial_def(nombre_multimetodo, lista_de_tipos, &bloque)
-    if self.instance_of?(Class)
-      destino = self #Porque estoy en una clase
-    else
-      destino = self.singleton_class #Porque estoy en una instancia
-    end
+    destino = self.obtener_destino()
     destino.sobre_cargar(Sobrecarga.new(nombre_multimetodo, PartialBlock.new(lista_de_tipos, &bloque)), nombre_multimetodo)
     destino.crear_multimetodo(nombre_multimetodo) unless destino.respond_to? nombre_multimetodo
   end
@@ -61,6 +47,11 @@ module MultiMethods
       raise NoSuchMultiMethodException
     end
     sobre_carga.partial_block
+  end
+
+  #Si soy una clase, yo mismo, si soy una instancia, mi singleton_class
+  def obtener_destino
+    self.is_a?(Class) ? self : self.singleton_class
   end
 
 end
