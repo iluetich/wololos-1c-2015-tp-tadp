@@ -1,41 +1,48 @@
 class Sobrecarga
 
-  def initialize (un_nombre, un_bloque_parcial)
-    @nombre = un_nombre
-    @bloque_parcial = un_bloque_parcial
+  def initialize (selector, partial_block)
+    @selector = selector
+    @partial_block = partial_block
   end
 
   def tipos_de_parametros
-    @bloque_parcial.tipos_de_parametros
+    @partial_block.tipos_de_parametros
   end
 
-  def nombre
-    @nombre = @nombre || "sin nombre"
+  def selector
+    @selector
   end
 
   def partial_block
-    @bloque_parcial
+    @partial_block
   end
 
   def matches(*argumentos)
-    @bloque_parcial.matches(*argumentos)
+    @partial_block.matches(*argumentos)
+  end
+
+  def matcheas_con(selector, tipos_de_parametros)
+    return false unless (@selector == selector && self.tipos_de_parametros.count == tipos_de_parametros.count)
+    self.tipos_de_parametros.zip(tipos_de_parametros).all? do |sc_tipo, pm_tipo|
+      pm_tipo.ancestors.include?(sc_tipo)
+    end
   end
 
   def call(*argumentos)
-    @bloque_parcial.call(*argumentos)
+    @partial_block.call(*argumentos)
   end
 
   def distancia_a_parametros(*argumentos)
     i = distancia_total = 0
-    argumentos.zip(@bloque_parcial.tipos_de_parametros) do |argumento, tipo|
+    argumentos.zip(@partial_block.tipos_de_parametros) do |argumento, tipo|
       i+=1
       distancia_total += argumento.class.ancestors.index(tipo) * i
     end
     distancia_total
   end
 
-  def es_misma_firma(nombre_multimetodo, lista_de_tipos)
-    @nombre == nombre_multimetodo && self.tipos_de_parametros == lista_de_tipos
+  def sos_igual_a?(selector, tipos_de_parametros)
+    @selector == selector && self.tipos_de_parametros == tipos_de_parametros
   end
 
 end
