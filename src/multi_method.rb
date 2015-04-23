@@ -25,7 +25,7 @@ module MultiMethods
   end
 
   def sobre_cargar(una_sobrecarga, nombre_multimetodo)
-    self.multimetodos.delete_if{ |s| s.es_misma_firma(nombre_multimetodo, una_sobrecarga.partial_block) }
+    self.multimetodos.delete_if{ |s| s.es_misma_firma(nombre_multimetodo, una_sobrecarga.tipos_de_parametros) }
     self.agregar_sobre_carga(una_sobrecarga)
   end
 
@@ -52,6 +52,26 @@ module MultiMethods
   #Si soy una clase, yo mismo, si soy una instancia, mi singleton_class
   def obtener_destino
     self.is_a?(Class) ? self : self.singleton_class
+  end
+
+  #Busco en mi singleton_class o en mi class. Con que esté en alguna me basta.
+  def existe_multimetodo?(symbol, lista_de_tipos)
+    self.singleton_class.multimetodos.any? {|m| m.es_misma_firma(symbol, lista_de_tipos)} or
+        self.class.multimetodos.any? {|m| m.es_misma_firma(symbol, lista_de_tipos)}
+  end
+
+  #Pseudo re-definición de respond_to?. No pisa a la definida en Kernel.
+  def respond_to?(*args)
+    case args.size
+      when 1 #sólo me pasan el symbol. => Método normal #FIXME! puede ser un multimetodo.
+        super(args[0])
+      when 2 #me pasan el symbol y el booleano. => Método normal
+        super(args[0], args[1])
+      when 3 #me pasan symbol, booleano y lista_tipos. => Multimétodo
+        self.existe_multimetodo?(args[0],args[2])
+      else
+        raise ArgumentError 'Demasiados parámetros para respond_to?'
+    end
   end
 
 end

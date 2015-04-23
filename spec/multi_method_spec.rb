@@ -64,6 +64,10 @@ describe ClaseParaTest do
       expect(@instancia.respond_to? :concat).to eq(true)
       expect(@instancia.respond_to? :nacho).to eq(true)
       expect(@instancia.respond_to? :concatenar).to eq(false)
+      expect(@instancia.respond_to? :suma).to eq(true)
+      expect(@instancia.respond_to?(:concat, false, [Integer,Integer])).to eq(true)
+      expect(@instancia.respond_to?(:concat, false, [Object, Symbol, String, Integer])).to eq(false)
+      expect(@instancia.respond_to? :eql?).to eq(true)
     end
 
     it "Invocar a self dentro de un multimetodo funciona" do
