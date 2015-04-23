@@ -34,8 +34,8 @@ class Sobrecarga
     distancia_total
   end
 
-  def es_misma_firma(nombre_multimetodo, bloque_parcial)
-    @nombre == nombre_multimetodo && self.tipos_de_parametros == bloque_parcial.tipos_de_parametros
+  def es_misma_firma(nombre_multimetodo, lista_de_tipos)
+    @nombre == nombre_multimetodo && self.tipos_de_parametros == lista_de_tipos
   end
 
 end
