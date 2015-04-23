@@ -25,8 +25,9 @@ describe ClaseParaTest do
     ClaseParaTest.partial_def(:concat, [String, Integer]) {|s1,n| s1 * n}
     ClaseParaTest.partial_def(:sumar_numeros, [Numeric, Numeric]) {|n, m| self.suma(n,m)}
     ClaseParaTest.partial_def(:metodo_loco,[Numeric]) {|n1| n1 * 1}
-    ClaseBlah.partial_def(:suma,[Numeric]) {|a| a}
-    @instancia_loca = ClaseBlah.new
+    ClaseParaTest.partial_def(:heredame, []) { "Me heredaste! =)" }
+    ClaseBlah.partial_def(:magia,[Numeric]) {|a| a}
+    @instancia_de_subclase = ClaseBlah.new
     @instancia = ClaseParaTest.new
     @objeto = Object.new
   end
@@ -60,13 +61,13 @@ describe ClaseParaTest do
     end
 
     it "Las instancias responden a los multimetodos" do
-      #TODO falta extender respond_to? a 3 parámetros. (ver ejemplo de TP)
       expect(@instancia.respond_to? :concat).to eq(true)
       expect(@instancia.respond_to? :nacho).to eq(true)
       expect(@instancia.respond_to? :concatenar).to eq(false)
       expect(@instancia.respond_to? :suma).to eq(true)
       expect(@instancia.respond_to?(:concat, false, [Integer,Integer])).to eq(true)
-      expect(@instancia.respond_to?(:concat, false, [Object, Symbol, String, Integer])).to eq(false)
+      expect(@instancia.respond_to?(:concat, false, [])).to eq(false)
+      expect(@instancia.respond_to?(:nacho, false, [Integer, String, Integer])).to eq(true)
       expect(@instancia.respond_to? :eql?).to eq(true)
     end
 
@@ -111,10 +112,15 @@ describe ClaseParaTest do
   end
 
   describe "Tests de ejecución sobre herencia de clases" do
-    it "Funciona method lookup" do
-      expect(@instancia_loca.suma(1,2)).to eq(3)
+    it "Invocar a self dentro de un multimétodo" do
+      expect(@instancia.sumar_numeros(1,2)).to eq(3)
+    end
+
+    it "Se heredan los multimétodos" do
+      #instancia_de_subclase solo tiene definido el multimétodo 'magia'
+      expect(@instancia_de_subclase.concat(1,1)).to eq(2)
+      expect(@instancia_de_subclase.nacho(1,1,1)).to eq(3)
+      expect(@instancia_de_subclase.heredame).to eq("Me heredaste! =)")
     end
   end
-
-
 end
