@@ -52,8 +52,8 @@ module MultiMethods
 
   #Busco en mi singleton_class o en mi class. Con que esté en alguna me basta.
   def existe_multimetodo?(symbol, lista_de_tipos)
-    self.singleton_class.sobrecargas.any? {|m| m.matcheas_con(symbol, lista_de_tipos)} or
-        self.class.sobrecargas.any? {|m| m.matcheas_con(symbol, lista_de_tipos)}
+    self.singleton_class.sobrecargas.any? {|m| m.matcheas_con?(symbol, lista_de_tipos)} or
+        self.class.sobrecargas.any? {|m| m.matcheas_con?(symbol, lista_de_tipos)}
   end
 
   def respond_to?(*args)

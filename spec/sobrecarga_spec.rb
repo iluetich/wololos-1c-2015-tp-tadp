@@ -14,13 +14,13 @@ describe "ContextUp" do
 
   describe "Tests sobre igualdad de sobrecargas y matcheos con parametros" do
     it "Las sobrecargas 'doble' y 'saraza' no son misma firma" do
-      expect(@sobrecarga_doble.sos_igual_a?(@sobrecarga_saraza.selector, @sobrecarga_saraza.tipos_de_parametros)).to eq(false)
-      expect(@sobrecarga_doble.sos_igual_a?(@sobrecarga_doble.selector, @sobrecarga_doble.tipos_de_parametros)).to eq(true)
+      expect(@sobrecarga_doble.matcheas_con?(@sobrecarga_saraza.selector, @sobrecarga_saraza.tipos_de_parametros)).to eq(false)
+      expect(@sobrecarga_doble.matcheas_con?(@sobrecarga_doble.selector, @sobrecarga_doble.tipos_de_parametros)).to eq(true)
     end
 
     it "Una lista de sub-tipos de los tipos de parametros de una sobrecarga son matcheables" do
-      expect(@sobrecarga_doble.matcheas_con(:matrix_recargado, [Integer])).to eq(true)
-      expect(@sobrecarga_saraza.matcheas_con(:matrix_recargado, [Integer, Integer])).to eq(true)
+      expect(@sobrecarga_doble.matcheas_con?(:matrix_recargado, [Integer])).to eq(true)
+      expect(@sobrecarga_saraza.matcheas_con?(:matrix_recargado, [Integer, Integer])).to eq(true)
     end
   end
 
