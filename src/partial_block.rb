@@ -1,8 +1,8 @@
 class PartialBlock
 
-  def initialize(array_tipos_de_parametros,&block)
+  def initialize(tipos_de_parametros,&block)
     @bloque = block
-    @tipos_de_parametros = array_tipos_de_parametros
+    @tipos_de_parametros = tipos_de_parametros
   end
 
   def tipos_de_parametros

@@ -46,6 +46,5 @@ describe "ContextUp" do
       expect { @exploding_block.call(10, "super saraza") }.to raise_error(ArgumentTypeException)
       expect { @exploding_block.call("Hola", 2) }.to raise_error(ArgumentTypeException)
     end
-
   end
 end
