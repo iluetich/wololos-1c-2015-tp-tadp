@@ -144,14 +144,14 @@ describe ClaseParaTest do
     end
 
     it "Se redefine un multimetodo en una sublcase con multimetodo heredado y complementa" do
-        expect(ClaseBlah.new.heredame).to eq("Me heredaste! =)")
-        ClaseBlah.partial_def(:heredame,[String]) {|string| string}
-        ClaseBlah.partial_def(:heredame,[String,Fixnum]) do |s,n|
-          s*n
-        end
-        expect(ClaseBlah.new.heredame("Redefinido complemento!")).to eq("Redefinido complemento!")
-        expect(ClaseBlah.new.heredame("Complementado ",3)).to eq("Complementado Complementado Complementado ")
-        expect(ClaseBlah.new.heredame).to eq("Me heredaste! =)")
+      expect(ClaseBlah.new.heredame).to eq("Me heredaste! =)")
+      ClaseBlah.partial_def(:heredame,[String]) {|string| string}
+      ClaseBlah.partial_def(:heredame,[String,Fixnum]) do |s,n|
+        s*n
+      end
+      expect(ClaseBlah.new.heredame("Redefinido complemento!")).to eq("Redefinido complemento!")
+      expect(ClaseBlah.new.heredame("Complementado ",3)).to eq("Complementado Complementado Complementado ")
+      expect(ClaseBlah.new.heredame).to eq("Me heredaste! =)")
     end
 
     it "Se redefine un multimetodo en una subclase con metodo comun heredado" do
@@ -161,8 +161,27 @@ describe ClaseParaTest do
       expect(ClaseParaTest.new.heredame).to eq("Me heredaste! =)")
     end
 
-
-
+    it "Ejemplo del TP para herencia" do
+      class A
+        A.partial_def :m, [String] do |s|
+          "A>m #{s}"
+        end
+        A.partial_def :m, [Numeric] do |n|
+          "A>m" * n
+        end
+        A.partial_def :m, [Object] do |o|
+          "A>m and Object"
+        end
+      end
+      class B < A
+        partial_def :m, [Object] do |o|
+          "B>m and Object"
+        end
+      end
+      b = B.new
+      expect(b.m("hello")).to eq("A>m hello")
+      expect(b.m(Object.new)).to eq("B>m and Object")
+    end
 
   end
 end
