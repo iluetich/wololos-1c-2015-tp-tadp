@@ -4,7 +4,6 @@ require_relative '../src/partial_block'
 
 module MultiMethods
 
-  #Creo un multimethod en el contexto en que lo definen
   def crear_multimetodo!(selector)
     contexto = self
     self.send(:define_method, selector) { |*argumentos|
@@ -13,7 +12,7 @@ module MultiMethods
         instance_exec(*argumentos, &comportamiento)
       rescue NoSuchMultiMethodException
         #Seguir con el method LookUp
-        puts "Buscando multimétodo", nombre: selector
+        puts "Buscando multimétodo: #{selector}"
         super(*argumentos)
       end
     }
@@ -34,12 +33,17 @@ module MultiMethods
     @lista_de_multimetodos = @lista_de_multimetodos || []
   end
 
-  def seleccionar_sobrecargas_matcheando(selector, *argumentos)
-    self.sobrecargas.select { |s| s.selector == selector && s.matches(*argumentos) }
+  def seleccionar_sobrecargas_aplicables(selector, *argumentos)
+    sobrecargas_ancestros = []
+    sobrecargas_ancestros += self.sobrecargas
+    self.ancestors.each do |ancestro|
+      sobrecargas_ancestros += ancestro.sobrecargas
+    end
+    sobrecargas_ancestros.select { |s| s.selector == selector && s.matches(*argumentos) }
   end
 
   def obtener_partial_block(selector, *argumentos)
-    unless (sobrecarga = self.seleccionar_sobrecargas_matcheando(selector, *argumentos).min_by { |m| m.distancia_a_parametros(*argumentos) })
+    unless (sobrecarga = self.seleccionar_sobrecargas_aplicables(selector, *argumentos).min_by { |m| m.distancia_a_parametros(*argumentos) })
       raise NoSuchMultiMethodException
     end
     sobrecarga.partial_block
