@@ -7,6 +7,9 @@ class ClaseParaTest
   def suma(a, b)
     a + b
   end
+  def heredame_normal
+    "Heredado Normal"
+  end
 end
 
 class ClaseBlah < ClaseParaTest
@@ -26,6 +29,7 @@ describe ClaseParaTest do
     ClaseParaTest.partial_def(:sumar_numeros, [Numeric, Numeric]) {|n, m| self.suma(n,m)}
     ClaseParaTest.partial_def(:metodo_loco,[Numeric]) {|n1| n1 * 1}
     ClaseParaTest.partial_def(:heredame, []) { "Me heredaste! =)" }
+    ClaseParaTest.partial_def(:heredame_partial, []) { "Me heredaste! =)" }
     ClaseBlah.partial_def(:magia,[Numeric]) {|a| a}
     @instancia_de_subclase = ClaseBlah.new
     @instancia = ClaseParaTest.new
@@ -122,5 +126,43 @@ describe ClaseParaTest do
       expect(@instancia_de_subclase.nacho(1,1,1)).to eq(3)
       expect(@instancia_de_subclase.heredame).to eq("Me heredaste! =)")
     end
+
+    it "Se redefine un metodo comun en una subclase con multimetodo heredado" do
+      expect(ClaseBlah.new.heredame_partial).to eq("Me heredaste! =)")
+      class ClaseBlah
+        def heredame_partial
+          "Redefinido!"
+        end
+      end
+      expect(ClaseBlah.new.heredame_partial).to eq("Redefinido!")
+    end
+
+    it "Se redefine un multimetodo en una subclase con metodo comun heredado" do
+      expect(ClaseBlah.new.heredame_normal).to eq("Heredado Normal")
+      ClaseBlah.partial_def(:heredame_normal,[]) {"Redefinido Partial!"}
+      expect(ClaseBlah.new.heredame_normal).to eq("Redefinido Partial!")
+    end
+
+    it "Se redefine un multimetodo en una sublcase con multimetodo heredado y complementa" do
+        expect(ClaseBlah.new.heredame).to eq("Me heredaste! =)")
+        ClaseBlah.partial_def(:heredame,[String]) {|string| string}
+        ClaseBlah.partial_def(:heredame,[String,Fixnum]) do |s,n|
+          s*n
+        end
+        expect(ClaseBlah.new.heredame("Redefinido complemento!")).to eq("Redefinido complemento!")
+        expect(ClaseBlah.new.heredame("Complementado ",3)).to eq("Complementado Complementado Complementado ")
+        expect(ClaseBlah.new.heredame).to eq("Me heredaste! =)")
+    end
+
+    it "Se redefine un multimetodo en una subclase con metodo comun heredado" do
+      expect(ClaseBlah.new.heredame).to eq("Me heredaste! =)")
+      ClaseBlah.partial_def(:heredame,[]) {"Sobreescrito!!!"}
+      expect(ClaseBlah.new.heredame).to eq("Sobreescrito!!!")
+      expect(ClaseParaTest.new.heredame).to eq("Me heredaste! =)")
+    end
+
+
+
+
   end
 end
