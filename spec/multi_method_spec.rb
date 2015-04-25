@@ -198,9 +198,13 @@ describe ClaseParaTest do
             base.m([Object], n) + " => B>m_numeric"
           end
         end
-        expect(R.new.m(1)).to eq("A>m => B>m_numeric => B>m_integer(1)")
+        class S < R
+          partial_def :m, [String] do |s|
+            base.m([Integer], 1) + " => S>m_string(#{s})"
+          end
+        end
+        expect(S.new.m("Hola")).to eq("A>m => B>m_numeric => B>m_integer(1) => S>m_string(Hola)")
       end
-
     end
   end
 end

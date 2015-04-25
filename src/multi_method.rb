@@ -32,7 +32,6 @@ module MultiMethods
       return (@lista_de_multimetodos = @lista_de_multimetodos || [])
     end
     overloads = []
-    overloads += self.sobrecargas
     obtener_contexto.ancestors.each do |viejo|
       overloads += viejo.sobrecargas
     end
@@ -79,15 +78,13 @@ module MultiMethods
   def method_missing(selector, *args, &block)
     super(selector,*args,&block) unless args[0].is_a?(Array)
     #por convención, recibo una lista de tipos en el primer argumentos
-    lista_de_tipos = args[0]
-    #borro la lista para quedarme con los argumentos.
-    args.delete_at 0
+    lista_de_tipos = args.shift
     #Si encuentro una sobrecarga que matchee exactamente con la lista de tipos, me la quedo y la ejecuto.
     super(selector,*args,&block) unless (overload_a_ejecutar = self.sobrecargas(true).detect {|ov| ov.sos_igual_a?(selector, lista_de_tipos)})
     overload_a_ejecutar.call(*args)
   end
 
-  def base
+  def base(*args)
     self
   end
 end
