@@ -11,8 +11,6 @@ module MultiMethods
         comportamiento = contexto.obtener_partial_block(selector, *argumentos).bloque
         instance_exec(*argumentos, &comportamiento)
       rescue NoSuchMultiMethodException
-        #Seguir con el method LookUp
-        puts "Buscando multimétodo: #{selector}"
         super(*argumentos)
       end
     }
@@ -28,18 +26,21 @@ module MultiMethods
     self.sobrecargas.delete_if{ |s| s.sos_igual_a?(sobrecarga.selector, sobrecarga.tipos_de_parametros) }
     self.sobrecargas << sobrecarga
   end
-
-  def sobrecargas
-    @lista_de_multimetodos = @lista_de_multimetodos || []
+  
+  def sobrecargas(buscar_en_ancestros=false)
+    unless buscar_en_ancestros
+      return (@lista_de_multimetodos = @lista_de_multimetodos || [])
+    end
+    overloads = []
+    overloads += self.sobrecargas
+    obtener_contexto.ancestors.each do |viejo|
+      overloads += viejo.sobrecargas
+    end
+    overloads
   end
 
   def seleccionar_sobrecargas_aplicables(selector, *argumentos)
-    sobrecargas_ancestros = []
-    sobrecargas_ancestros += self.sobrecargas
-    self.ancestors.each do |ancestro|
-      sobrecargas_ancestros += ancestro.sobrecargas
-    end
-    sobrecargas_ancestros.select { |s| s.selector == selector && s.matches(*argumentos) }
+    self.sobrecargas(true).select { |s| s.selector == selector && s.matches(*argumentos) }
   end
 
   def obtener_partial_block(selector, *argumentos)
@@ -75,4 +76,18 @@ module MultiMethods
     end
   end
 
+  def method_missing(selector, *args, &block)
+    super(selector,*args,&block) unless args[0].is_a?(Array)
+    #por convención, recibo una lista de tipos en el primer argumentos
+    lista_de_tipos = args[0]
+    #borro la lista para quedarme con los argumentos.
+    args.delete_at 0
+    #Si encuentro una sobrecarga que matchee exactamente con la lista de tipos, me la quedo y la ejecuto.
+    super(selector,*args,&block) unless (overload_a_ejecutar = self.sobrecargas(true).detect {|ov| ov.sos_igual_a?(selector, lista_de_tipos)})
+    overload_a_ejecutar.call(*args)
+  end
+
+  def base
+    self
+  end
 end
