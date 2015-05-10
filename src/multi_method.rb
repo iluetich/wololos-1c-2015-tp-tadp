@@ -16,12 +16,14 @@ class Object
     singleton_class.sobrecargas + self.class.sobrecargas(incluir_ancestros)
   end
 
-  def existe_multimetodo?(symbol, lista_de_tipos)
-    sobrecargas(true).any? {|overload| overload.matcheas_con?(symbol, lista_de_tipos)}
+  def existe_multimetodo?(sym, type_list)
+    mock = Sobrecarga.new(sym, PartialBlock.new(type_list) { })
+    sobrecargas(true).any? {|overload| overload.matcheas_con?(mock)}
   end
 
   def exact_overload(sym, type_list)
-    sobrecargas(true).detect {|overload| overload.sos_igual_a?(sym, type_list)}
+    mock = Sobrecarga.new(sym, PartialBlock.new(type_list) { })
+    sobrecargas(true).detect {|overload| overload.sos_igual_a?(mock)}
   end
 
   def overloads_matching(selector, *argumentos)
@@ -97,21 +99,16 @@ class Module
   end
 
   def agregar_sobrecarga!(sobrecarga)
-    sobrecargas.delete_if { |s|
-      s.sos_igual_a?(sobrecarga.selector, sobrecarga.tipos_de_parametros)
-    }
+    sobrecargas.delete_if { |s| s.sos_igual_a?(sobrecarga)}
     sobrecargas << sobrecarga
   end
 
   def sobrecargas(buscar_en_ancestros=false)
-    unless buscar_en_ancestros
-      return (@lista_de_multimetodos = @lista_de_multimetodos || [])
+    if buscar_en_ancestros
+      ancestors.collect {|ancestro| ancestro.sobrecargas}.flatten
+    else
+      @multimethods = @multimethods || Array.new
     end
-    overloads = []
-    ancestors.each do |viejo|
-      overloads += viejo.sobrecargas
-    end
-    overloads
   end
 
 end

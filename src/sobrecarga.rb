@@ -21,9 +21,11 @@ class Sobrecarga
     @partial_block.matches(*argumentos)
   end
 
-  def matcheas_con?(selector, tipos_de_parametros)
-    return false unless (@selector == selector && self.tipos_de_parametros.count == tipos_de_parametros.count)
-    self.tipos_de_parametros.zip(tipos_de_parametros).all? do |sc_tipo, pm_tipo|
+  def matcheas_con?(sobrecarga)
+    unless @selector == sobrecarga.selector && tipos_de_parametros.count == sobrecarga.tipos_de_parametros.count
+      return false
+    end
+    tipos_de_parametros.zip(tipos_de_parametros).all? do |sc_tipo, pm_tipo|
       pm_tipo.ancestors.include?(sc_tipo)
     end
   end
@@ -41,8 +43,8 @@ class Sobrecarga
     distancia_total
   end
 
-  def sos_igual_a?(selector, tipos_de_parametros)
-    @selector == selector && self.tipos_de_parametros == tipos_de_parametros
+  def sos_igual_a?(sobrecarga)
+    @selector == sobrecarga.selector && self.tipos_de_parametros == sobrecarga.tipos_de_parametros
   end
 
 end
