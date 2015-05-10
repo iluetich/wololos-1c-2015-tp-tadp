@@ -1,8 +1,6 @@
 require 'rspec'
 require_relative '../src/multi_method'
 
-Object.include(MultiMethods)
-
 class ClaseParaTest
   def suma(a, b)
     a + b
@@ -204,6 +202,29 @@ describe ClaseParaTest do
           end
         end
         expect(S.new.m("Hola")).to eq("A>m => B>m_numeric => B>m_integer(1) => S>m_string(Hola)")
+      end
+
+      it "base implícita" do
+        class Feel
+          partial_def :k, [BasicObject] do |n|
+            "Meta Final "
+          end
+        end
+        class Fool < Feel
+          partial_def :k, [Comparable] do |n|
+            base(n) + "LO"
+          end
+          partial_def :k, [Numeric] do |n|
+            base(n) + "LO"
+          end
+          partial_def :k, [Object] do |n|
+            base(n) + "Aca termino"
+          end
+          partial_def :k, [Integer] do |n|
+            base(n) + "LO"
+          end
+        end
+        expect(Fool.new.k(1)).to eq("Meta Final Aca terminoLOLOLO")
       end
     end
   end
