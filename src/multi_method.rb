@@ -2,6 +2,39 @@ require_relative '../src/exceptions/exceptions'
 require_relative '../src/sobrecarga'
 require_relative '../src/partial_block'
 
+class Module
+
+  def partial_def(selector, lista_de_tipos, &bloque)
+    agregar_sobrecarga!(Sobrecarga.new(selector, PartialBlock.new(lista_de_tipos, &bloque)))
+    crear_multimetodo!(selector) unless respond_to? selector
+  end
+
+  def crear_multimetodo!(selector)
+    self.send(:define_method, selector) { |*argumentos|
+      begin
+        overload_to_exec = nearest_overload(selector, *argumentos)
+        execute(overload_to_exec, *argumentos)
+      rescue NoSuchMultiMethodException
+        super(*argumentos)
+      end
+    }
+  end
+
+  def agregar_sobrecarga!(sobrecarga)
+    sobrecargas.delete_if { |s| s.sos_igual_a?(sobrecarga)}
+    sobrecargas << sobrecarga
+  end
+
+  def sobrecargas(buscar_en_ancestros=false)
+    if buscar_en_ancestros
+      ancestors.collect {|ancestro| ancestro.sobrecargas}.flatten
+    else
+      @multimethods = @multimethods || Array.new
+    end
+  end
+
+end
+
 class Object
 
   attr_accessor :last_overload
@@ -57,8 +90,8 @@ class Object
   end
 
   def method_missing(selector, *args, &block)
-    super unless args[0].is_a? Array
-    overload_to_exec = exact_overload(selector, args[0])
+    super unless args.first.is_a? Array
+    overload_to_exec = exact_overload(selector, args.first)
     execute(overload_to_exec, *args.drop(1))
   end
 
@@ -76,39 +109,6 @@ class Object
     self.last_overload = overload
     block = overload.partial_block.bloque
     instance_exec(*args, &block)
-  end
-
-end
-
-class Module
-
-  def partial_def(selector, lista_de_tipos, &bloque)
-    agregar_sobrecarga!(Sobrecarga.new(selector, PartialBlock.new(lista_de_tipos, &bloque)))
-    crear_multimetodo!(selector) unless respond_to? selector
-  end
-
-  def crear_multimetodo!(selector)
-    self.send(:define_method, selector) { |*argumentos|
-      begin
-        overload_to_exec = nearest_overload(selector, *argumentos)
-        execute(overload_to_exec, *argumentos)
-      rescue NoSuchMultiMethodException
-        super(*argumentos)
-      end
-    }
-  end
-
-  def agregar_sobrecarga!(sobrecarga)
-    sobrecargas.delete_if { |s| s.sos_igual_a?(sobrecarga)}
-    sobrecargas << sobrecarga
-  end
-
-  def sobrecargas(buscar_en_ancestros=false)
-    if buscar_en_ancestros
-      ancestors.collect {|ancestro| ancestro.sobrecargas}.flatten
-    else
-      @multimethods = @multimethods || Array.new
-    end
   end
 
 end
