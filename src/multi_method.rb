@@ -46,7 +46,7 @@ class Object
   #Las sobrecargas de un objeto son las de su singleton class mas las de su clase, y opcionalmente la de sus
   #ancestros.
   def sobrecargas(incluir_ancestros=false)
-    singleton_class.sobrecargas + self.class.sobrecargas(incluir_ancestros)
+    singleton_class.sobrecargas(incluir_ancestros)
   end
 
   def existe_multimetodo?(sym, type_list)
