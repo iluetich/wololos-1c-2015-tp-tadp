@@ -182,7 +182,7 @@ describe ClaseParaTest do
     end
 
     describe "Base" do
-      it "not today" do
+      it "base explícita" do
         class K
           partial_def :m, [Object] do |o|
             "A>m"
@@ -225,6 +225,32 @@ describe ClaseParaTest do
           end
         end
         expect(Fool.new.k(1)).to eq("Meta Final Aca terminoLOLOLO")
+      end
+
+      it "Varios niveles mezclando base implícita con explícita (raidboss)" do
+        class Alpha
+          partial_def :m, [Object] do |o|
+            "Alpha>m[Object]"
+          end
+          partial_def :m, [Comparable] do |i|
+            base(i) + "Alpha>m[Integer]" + " #{i.to_s}"
+          end
+        end
+        class Betha < Alpha
+          partial_def :k, [Fixnum] do |i|
+            base(i) + "Betha>k[Fixnum]" + " #{i.to_s}"
+          end
+          partial_def :k, [Integer] do |i|
+            base.m([Numeric], i) + "Betha>k[Integer]" + " #{i.to_s}"
+          end
+          partial_def :m, [Integer] do |i|
+            base.k([Fixnum], i) + "Betha>m[Integer]" + " #{i.to_s}"
+          end
+          partial_def :m, [Numeric] do |i|
+            base(i) + "Betha>m[Numeric]" + " #{i.to_s}"
+          end
+        end
+        expect(Betha.new.m(10)).to eq("Alpha>m[Object]" + "Alpha>m[Integer]" + " 10" + "Betha>m[Numeric]" + " 10" + "Betha>k[Integer]" + " 10" + "Betha>k[Fixnum]" + " 10" + "Betha>m[Integer]" + " 10")
       end
     end
   end
