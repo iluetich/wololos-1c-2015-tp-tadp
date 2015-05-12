@@ -89,26 +89,36 @@ class Object
     end
   end
 
-  def method_missing(selector, *args, &block)
-    super unless args.first.is_a? Array
-    overload_to_exec = exact_overload(selector, args.first)
-    execute(overload_to_exec, *args.drop(1))
-  end
-
   def base(*args)
-    if args.empty?
-      self
-    else
-      sym = last_overload.selector
-      overload_to_exec = inmediate_next_overload(sym, *args)
-      execute(overload_to_exec, *args)
-    end
+    objeto_base = Base.new(self)
+    args.empty? ? objeto_base : objeto_base.implicit_call(*args)
   end
 
   def execute(overload, *args)
     self.last_overload = overload
     block = overload.partial_block.bloque
     instance_exec(*args, &block)
+  end
+
+end
+
+class Base
+
+  attr_accessor :caller
+
+  def initialize(caller)
+    self.caller = caller
+  end
+
+  def implicit_call(*arguments)
+    sym_last_overload = caller.last_overload.selector
+    overload = caller.inmediate_next_overload(sym_last_overload, *arguments)
+    caller.execute(overload, *arguments)
+  end
+
+  def method_missing(sym, type_list, *args, &block)
+    overload = caller.exact_overload(sym, type_list)
+    caller.execute(overload, *args)
   end
 
 end
