@@ -4,30 +4,26 @@ require_relative '../src/partial_block'
 
 class Module
 
-  def partial_def(selector, lista_de_tipos, &bloque)
-    agregar_sobrecarga!(Sobrecarga.new(selector, PartialBlock.new(lista_de_tipos, &bloque)))
-    crear_multimetodo!(selector) unless respond_to? selector
+  def partial_def(sym, type_list, &bloque)
+    multimethod_add_new!(Sobrecarga.new(sym, PartialBlock.new(type_list, &bloque)))
+    multimethod_create!(sym) unless respond_to? sym
   end
 
-  def crear_multimetodo!(selector)
-    self.send(:define_method, selector) { |*argumentos|
-      begin
-        overload_to_exec = nearest_overload(selector, *argumentos)
-        execute(overload_to_exec, *argumentos)
-      rescue NoSuchMultiMethodException
-        super(*argumentos)
-      end
+  def multimethod_create!(sym)
+    self.send(:define_method, sym) { |*args|
+      multimethod_to_exec = multimethod_closest_to(sym, *args)
+      execute(multimethod_to_exec, *args)
     }
   end
 
-  def agregar_sobrecarga!(sobrecarga)
-    sobrecargas.delete_if { |s| s.sos_igual_a?(sobrecarga)}
-    sobrecargas << sobrecarga
+  def multimethod_add_new!(new_multimethod)
+    multimethods.delete_if { |s| s.sos_igual_a?(new_multimethod)}
+    multimethods << new_multimethod
   end
 
-  def sobrecargas(buscar_en_ancestros=false)
+  def multimethods(buscar_en_ancestros=false)
     if buscar_en_ancestros
-      ancestors.collect {|ancestro| ancestro.sobrecargas}.flatten
+      ancestors.collect {|ancestro| ancestro.multimethods}.flatten
     else
       @multimethods = @multimethods || Array.new
     end
@@ -37,78 +33,85 @@ end
 
 class Object
 
-  attr_accessor :last_overload
+  attr_accessor :last_multimethod
 
-  def partial_def(selector, lista_de_tipos, &bloque)
-    singleton_class.partial_def(selector, lista_de_tipos, &bloque)
+  def partial_def(sym, type_list, &block)
+    singleton_class.partial_def(sym, type_list, &block)
   end
 
-  #Las sobrecargas de un objeto son las de su singleton class mas las de su clase, y opcionalmente la de sus
-  #ancestros.
-  def sobrecargas(incluir_ancestros=false)
-    singleton_class.sobrecargas(incluir_ancestros)
+  def multimethods(include_ancestors=false)
+    singleton_class.multimethods(include_ancestors)
   end
 
-  def existe_multimetodo?(sym, type_list)
-    mock = Sobrecarga.new(sym, PartialBlock.new(type_list) { })
-    sobrecargas(true).any? {|overload| overload.matcheas_con?(mock)}
-  end
-
-  def exact_overload(sym, type_list)
-    mock = Sobrecarga.new(sym, PartialBlock.new(type_list) { })
-    sobrecargas(true).detect {|overload| overload.sos_igual_a?(mock)}
-  end
-
-  def overloads_matching(selector, *argumentos)
-    sobrecargas(true).select {|s| s.selector == selector && s.matches(*argumentos)}
-  end
-
-  def nearest_overload(sym, *arguments)
-    sobrecarga = overloads_matching(sym, *arguments).min_by { |m|
-      m.distancia_a_parametros(*arguments)
-    }
-    unless sobrecarga
+  def multimethods_matching(sym, *argumentos)
+    matching_multimethods = multimethods(true).select {|m| m.selector == sym && m.matches(*argumentos)}
+    if matching_multimethods.empty?
       raise NoSuchMultiMethodException
+    else
+      matching_multimethods
     end
-    sobrecarga
   end
 
-  def inmediate_next_overload(sym, *args)
-    ordered_by_distance = sobrecargas(true).sort_by {|ov| ov.distancia_a_parametros(*args)}
-    index_of_last_overload = ordered_by_distance.index(last_overload)
+  def multimethod_exists_with?(sym, type_list)
+    mock = Sobrecarga.new(sym, PartialBlock.new(type_list) { })
+    multimethods(true).any? {|m| m.matcheas_con?(mock)}
+  end
+
+  def multimethod_strict_as(sym, type_list)
+    mock = Sobrecarga.new(sym, PartialBlock.new(type_list) { })
+    multimethods(true).detect {|m| m.sos_igual_a?(mock)}
+  end
+
+  def multimethod_closest_to(sym, *args)
+    multimethods_matching(sym, *args).min_by { |m| m.distancia_a_parametros(*args) }
+  end
+
+  def multimethod_next_generic(sym, *args)
+    ordered_by_distance = multimethods_matching(sym, *args).sort_by {|m| m.distancia_a_parametros(*args)}
+    last_multimethod_index = ordered_by_distance.index(last_multimethod)
     ordered_by_distance
-        .drop(index_of_last_overload + 1)
-        .detect {|ov| ov.selector == sym && ov.matches(*args)}
+        .drop(last_multimethod_index + 1)
+        .detect {|m| m.selector == sym && m.matches(*args)}
   end
 
-  def respond_to?(sym, include_all=false, parameter_type = nil)
-    if parameter_type.eql? nil
+  def respond_to?(sym, include_all=false, type_list = nil)
+    if type_list.eql? nil
       super(sym, include_all)
     else
-      existe_multimetodo?(sym, parameter_type)
+      multimethod_exists_with?(sym, type_list)
     end
-  end
-
-  def method_missing(selector, *args, &block)
-    super unless args.first.is_a? Array
-    overload_to_exec = exact_overload(selector, args.first)
-    execute(overload_to_exec, *args.drop(1))
   end
 
   def base(*args)
-    if args.empty?
-      self
-    else
-      sym = last_overload.selector
-      overload_to_exec = inmediate_next_overload(sym, *args)
-      execute(overload_to_exec, *args)
-    end
+    objeto_base = Base.new(self)
+    args.empty? ? objeto_base : objeto_base.implicit_call(*args)
   end
 
-  def execute(overload, *args)
-    self.last_overload = overload
-    block = overload.partial_block.bloque
+  def execute(multimethod_to_exec, *args)
+    self.last_multimethod = multimethod_to_exec
+    block = multimethod_to_exec.partial_block.bloque
     instance_exec(*args, &block)
+  end
+
+end
+
+class Base
+
+  attr_accessor :caller
+
+  def initialize(caller)
+    self.caller = caller
+  end
+
+  def implicit_call(*args)
+    last_multimethod_selector = caller.last_multimethod.selector
+    overload = caller.multimethod_next_generic(last_multimethod_selector, *args)
+    caller.execute(overload, *args)
+  end
+
+  def method_missing(sym, type_list, *args, &block)
+    overload = caller.multimethod_strict_as(sym, type_list)
+    caller.execute(overload, *args)
   end
 
 end
