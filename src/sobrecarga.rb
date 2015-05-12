@@ -25,7 +25,7 @@ class Sobrecarga
     unless @selector == sobrecarga.selector && tipos_de_parametros.count == sobrecarga.tipos_de_parametros.count
       return false
     end
-    tipos_de_parametros.zip(tipos_de_parametros).all? do |sc_tipo, pm_tipo|
+    tipos_de_parametros.zip(sobrecarga.tipos_de_parametros).all? do |sc_tipo, pm_tipo|
       pm_tipo.ancestors.include?(sc_tipo)
     end
   end
