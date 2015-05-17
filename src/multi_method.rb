@@ -7,8 +7,8 @@ class Module
   attr_accessor :last_multimethod
 
   def partial_def(sym, type_list, &bloque)
+    multimethod_create!(sym) unless multimethod_exists_with? sym
     multimethod_add_new!(Sobrecarga.new(sym, PartialBlock.new(type_list, &bloque)))
-    multimethod_create!(sym)
   end
 
   def multimethod_create!(sym)
@@ -29,6 +29,12 @@ class Module
     else
       @multimethods = @multimethods || Array.new
     end
+  end
+
+  def multimethod_exists_with?(sym, type_list=nil)
+    return multimethods.any? { |m| m.selector == sym } if type_list.eql? nil
+    mock = Sobrecarga.new(sym, PartialBlock.new(type_list) { })
+    multimethods(true).any? {|m| m.matcheas_con?(mock)}
   end
 
   def multimethods_matching(sym, *argumentos)
@@ -69,16 +75,11 @@ class Object
     singleton_class.multimethods(include_ancestors)
   end
 
-  def multimethod_exists_with?(sym, type_list)
-    mock = Sobrecarga.new(sym, PartialBlock.new(type_list) { })
-    multimethods(true).any? {|m| m.matcheas_con?(mock)}
-  end
-
   def respond_to?(sym, include_all=false, type_list = nil)
     if type_list.eql? nil
       super(sym, include_all)
     else
-      multimethod_exists_with?(sym, type_list)
+      singleton_class.multimethod_exists_with?(sym, type_list)
     end
   end
 
