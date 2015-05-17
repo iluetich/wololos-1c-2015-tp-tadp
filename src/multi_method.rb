@@ -4,14 +4,16 @@ require_relative '../src/partial_block'
 
 class Module
 
+  attr_accessor :last_multimethod
+
   def partial_def(sym, type_list, &bloque)
+    multimethod_create!(sym) unless multimethod_exists_with? sym
     multimethod_add_new!(Sobrecarga.new(sym, PartialBlock.new(type_list, &bloque)))
-    multimethod_create!(sym) unless respond_to? sym
   end
 
   def multimethod_create!(sym)
     self.send(:define_method, sym) { |*args|
-      multimethod_to_exec = multimethod_closest_to(sym, *args)
+      multimethod_to_exec = singleton_class.multimethod_closest_to(sym, *args)
       execute(multimethod_to_exec, *args)
     }
   end
@@ -29,18 +31,10 @@ class Module
     end
   end
 
-end
-
-class Object
-
-  attr_accessor :last_multimethod
-
-  def partial_def(sym, type_list, &block)
-    singleton_class.partial_def(sym, type_list, &block)
-  end
-
-  def multimethods(include_ancestors=false)
-    singleton_class.multimethods(include_ancestors)
+  def multimethod_exists_with?(sym, type_list=nil)
+    return multimethods.any? { |m| m.selector == sym } if type_list.eql? nil
+    mock = Sobrecarga.new(sym, PartialBlock.new(type_list) { })
+    multimethods(true).any? {|m| m.matcheas_con?(mock)}
   end
 
   def multimethods_matching(sym, *argumentos)
@@ -50,11 +44,6 @@ class Object
     else
       matching_multimethods
     end
-  end
-
-  def multimethod_exists_with?(sym, type_list)
-    mock = Sobrecarga.new(sym, PartialBlock.new(type_list) { })
-    multimethods(true).any? {|m| m.matcheas_con?(mock)}
   end
 
   def multimethod_strict_as(sym, type_list)
@@ -74,11 +63,23 @@ class Object
         .detect {|m| m.selector == sym && m.matches(*args)}
   end
 
+end
+
+class Object
+
+  def partial_def(sym, type_list, &block)
+    singleton_class.partial_def(sym, type_list, &block)
+  end
+
+  def multimethods(include_ancestors=false)
+    singleton_class.multimethods(include_ancestors)
+  end
+
   def respond_to?(sym, include_all=false, type_list = nil)
     if type_list.eql? nil
       super(sym, include_all)
     else
-      multimethod_exists_with?(sym, type_list)
+      singleton_class.multimethod_exists_with?(sym, type_list)
     end
   end
 
@@ -88,7 +89,7 @@ class Object
   end
 
   def execute(multimethod_to_exec, *args)
-    self.last_multimethod = multimethod_to_exec
+    singleton_class.last_multimethod = multimethod_to_exec
     block = multimethod_to_exec.partial_block.bloque
     instance_exec(*args, &block)
   end
@@ -104,13 +105,13 @@ class Base
   end
 
   def implicit_call(*args)
-    last_multimethod_selector = caller.last_multimethod.selector
-    overload = caller.multimethod_next_generic(last_multimethod_selector, *args)
+    last_multimethod_selector = caller.singleton_class.last_multimethod.selector
+    overload = caller.singleton_class.multimethod_next_generic(last_multimethod_selector, *args)
     caller.execute(overload, *args)
   end
 
   def method_missing(sym, type_list, *args, &block)
-    overload = caller.multimethod_strict_as(sym, type_list)
+    overload = caller.singleton_class.multimethod_strict_as(sym, type_list)
     caller.execute(overload, *args)
   end
 
