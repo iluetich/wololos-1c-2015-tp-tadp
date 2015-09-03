@@ -11,11 +11,11 @@ class Overload
     @partial_block.param_types
   end
 
-  def matches(*arguments)
+  def accepts?(*arguments)
     @partial_block.matches(*arguments)
   end
 
-  def matches_with?(overloads)
+  def identical_to?(overloads)
     return false unless valid? overloads
     param_types.zip(overloads.param_types).all? do |own_param_type, param_type|
       param_type.ancestors.include?(own_param_type)

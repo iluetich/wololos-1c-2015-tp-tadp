@@ -19,10 +19,16 @@ class PartialBlock < Proc
   end
 
   def matches(*arguments)
-    return false unless arguments.has_many_elements_as?(@param_types)
+    return false unless valid?(arguments, @param_types)
+    puts "Checking... " + arguments.to_s + " with " + @param_types.to_s
     arguments.zip(@param_types).all? do |argument, type|
       argument.is_a? type
     end
+  end
+
+  def valid?(arguments, types)
+    mandatory_types = types.select { |t| !t.eql? DefaultParameter }
+    arguments.has_many_elements_as?(mandatory_types) || arguments.has_many_elements_as?(types)
   end
 
 end

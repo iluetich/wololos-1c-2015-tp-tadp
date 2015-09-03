@@ -1,0 +1,3 @@
+module DefaultParameter
+end
+Object.include(DefaultParameter)

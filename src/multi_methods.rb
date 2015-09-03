@@ -40,12 +40,12 @@ class Module
   def m_method_exists_with?(sym, type_list = nil)
     return m_methods.any? { |m| m.selector.eql?(sym) } if type_list.nil?
     mock = Overload.new(sym, PartialBlock.new(type_list) {})
-    m_methods(true).any? { |m| m.matches_with?(mock) }
+    m_methods(true).any? { |m| m.identical_to?(mock) }
   end
 
   def m_methods_match(sym, *arguments)
-    matched_m_methods = m_methods(true).select { |m| m.selector.eql?(sym) && m.matches(*arguments) }
-    raise NoSuchMultiMethodException.new("#{sym} with #{arguments} does not exists") if matched_m_methods.empty?
+    matched_m_methods = m_methods(true).select { |m| m.selector.eql?(sym) && m.accepts?(*arguments) }
+    raise NoSuchMultiMethodException.new("Multimethod: #{sym} called with: #{arguments} does not exists") if matched_m_methods.empty?
     matched_m_methods
   end
 
@@ -63,7 +63,7 @@ class Module
     last_m_method_index = ordered_by_distance.index(last_m_method)
     ordered_by_distance
         .drop(last_m_method_index + 1)
-        .detect { |m| m.selector.eql?(sym) && m.matches(*args) }
+        .detect { |m| m.selector.eql?(sym) && m.accepts?(*args) }
   end
 
   def m_method_stack
