@@ -1,5 +1,5 @@
 require 'rspec'
-require_relative '../src/multi_method'
+require_relative '../src/multi_methods'
 
 class ClaseParaTest
   def suma(a, b)

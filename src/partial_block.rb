@@ -1,29 +1,28 @@
-class PartialBlock
+class Array
+  def has_many_elements_as?(other_array)
+    count.eql? other_array.count
+  end
+end
 
-  def initialize(tipos_de_parametros,&block)
-    @bloque = block
-    @tipos_de_parametros = tipos_de_parametros
+class PartialBlock < Proc
+
+  attr_accessor :block, :param_types
+
+  def initialize(param_types, &block)
+    @block = block
+    @param_types = param_types
   end
 
-  def tipos_de_parametros
-    @tipos_de_parametros = @tipos_de_parametros || []
+  def call(*parameters)
+    raise ArgumentTypeException unless matches(*parameters)
+    @block.call(*parameters)
   end
 
-  def bloque
-    @bloque
-  end
-
-  def call(*argumentos)
-    raise ArgumentTypeException unless self.matches(*argumentos)
-    @bloque.call(*argumentos)
-  end
-
-  def matches(*argumentos)
-    return false unless argumentos.count == @tipos_de_parametros.count
-    argumentos.zip(@tipos_de_parametros).all? do |argumento, tipo|
-      argumento.is_a? tipo
+  def matches(*arguments)
+    return false unless arguments.has_many_elements_as?(@param_types)
+    arguments.zip(@param_types).all? do |argument, type|
+      argument.is_a? type
     end
   end
 
 end
-
