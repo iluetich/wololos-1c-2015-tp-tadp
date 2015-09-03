@@ -4,6 +4,12 @@ class Array
   end
 end
 
+class Numeric
+  def is_between(floor, top)
+    self <= top && self >= floor
+  end
+end
+
 class PartialBlock < Proc
 
   attr_accessor :block, :param_types
@@ -20,15 +26,21 @@ class PartialBlock < Proc
 
   def matches(*arguments)
     return false unless valid?(arguments, @param_types)
-    puts "Checking... " + arguments.to_s + " with " + @param_types.to_s
-    arguments.zip(@param_types).all? do |argument, type|
+    param_types = to_types(@param_types)
+    arguments.zip(param_types).all? do |argument, type|
       argument.is_a? type
     end
   end
 
+  def to_types(some_wrappers)
+    raw_types = some_wrappers.select { |w| !w.eql? DefaultParameter }
+    wrappers = some_wrappers.select { |w| w.eql? DefaultParameter }
+    wrappers.map { |dp| dp.type } + raw_types
+  end
+
   def valid?(arguments, types)
     mandatory_types = types.select { |t| !t.eql? DefaultParameter }
-    arguments.has_many_elements_as?(mandatory_types) || arguments.has_many_elements_as?(types)
+    arguments.count.is_between(mandatory_types.count, types.count)
   end
 
 end

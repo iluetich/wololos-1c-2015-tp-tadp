@@ -267,7 +267,18 @@ describe ClaseParaTest do
         expect(SomeClass.new.default(1, 1)).to eq(2)
         expect(SomeClass.new.default(1, 1, 1)).to eq(3)
       end
-      
+
+      it 'Puedo definir los tipos de los parámetros default' do
+        class SomeClass
+          partial_def :a_method, [Integer, Integer, DefaultParameter.as(Integer)] do |x, y, z = 0|
+            x + y + z
+          end
+        end
+
+        expect(SomeClass.new.a_method(1,1,1)).to eq(3)
+        expect {SomeClass.new.a_method(1,1,'foo') }.to raise_error NoSuchMultiMethodException
+      end
+
     end
 
   end
